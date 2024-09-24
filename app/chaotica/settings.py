@@ -97,6 +97,14 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
 
 DEFAULT_HOURS_IN_DAY = os.environ.get("DEFAULT_HOURS_IN_DAY", default=7.5)
 
+## Set PTO Reset date for current year (1st Sept)
+PTO_RESET_DAY = 1
+PTO_RESET_MONTH = 9
+if datetime.date.today() < datetime.date(datetime.date.today().year, PTO_RESET_MONTH, PTO_RESET_DAY):
+    PTO_RESET_DATE =  datetime.date(datetime.date.today().year - 1, PTO_RESET_MONTH, PTO_RESET_DAY)
+else:
+    PTO_RESET_DATE =  datetime.date(datetime.date.today().year, PTO_RESET_MONTH, PTO_RESET_DAY)
+
 CONSTANCE_CONFIG = {
     # Feature Flags
     "EMAIL_ENABLED": (

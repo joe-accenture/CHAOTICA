@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
+from django.conf import settings as django_settings
 from django import forms
 from .models import LeaveRequest, User, Group, UserInvitation
 from crispy_forms.helper import FormHelper
@@ -20,6 +21,7 @@ from bootstrap_datepicker_plus.widgets import (
 )
 from django.core.files.images import get_image_dimensions
 from business_duration import businessDuration
+import datetime
 
 
 class CustomConfigForm(ConstanceForm):
@@ -210,6 +212,7 @@ class LeaveRequestForm(forms.ModelForm):
         cleaned_data = super().clean()
         start = cleaned_data.get("start_date")
         end = cleaned_data.get("end_date")
+        leave_type = cleaned_data.get("type_of_leave")
         today = timezone.now()
 
         if LeaveRequest.objects.filter(
@@ -226,6 +229,10 @@ class LeaveRequestForm(forms.ModelForm):
         # Uncomment to not allow post dated leave requests
         #if start < today:
         #    self.add_error("start_date", "The start date is before today.")
+
+        # Make sure 'Annual leave' start date is not before PTO year end
+        if int(leave_type) == 0 and datetime.date(start.year, start.month, start.day) < django_settings.PTO_RESET_DATE:
+            self.add_error("start_date", "The start date is before the current vacation year. ({})".format(str(django_settings.PTO_RESET_DATE)))
 
         if start > end:
             self.add_error("end_date", "The end date is before the start date.")

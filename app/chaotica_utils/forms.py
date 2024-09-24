@@ -222,8 +222,10 @@ class LeaveRequestForm(forms.ModelForm):
                 None, "Unable to save. The dates overlap an existing leave request."
             )
 
-        if start < today:
-            self.add_error("start_date", "The start date is before today.")
+        # Check Start date is not before current date
+        # Uncomment to not allow post dated leave requests
+        #if start < today:
+        #    self.add_error("start_date", "The start date is before today.")
 
         if start > end:
             self.add_error("end_date", "The end date is before the start date.")

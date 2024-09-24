@@ -14,6 +14,16 @@ Menu.add_item(
     ),
 )
 
+Menu.add_item(
+    "add",
+    RoleMenuItem(
+        "Request Leave",
+        reverse("request_own_leave"),
+        icon="person-walking-arrow-right",
+        requiredRole="*",  # Any role will do!
+        weight=2,
+    ),
+)
 
 Menu.add_item(
     "user",

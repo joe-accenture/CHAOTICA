@@ -5,12 +5,34 @@ from chaotica_utils.utils import PermMenuItem, RoleMenuItem
 
 Menu.add_item(
     "add",
-    RoleMenuItem(
+    PermMenuItem(
         "Add Job",
         reverse("job_create"),
         icon="cubes",
-        requiredRole="*",  # Any role will do!
+        perm="jobtracker.add_job",
         weight=1,
+    ),
+)
+
+Menu.add_item(
+    "add",
+    PermMenuItem(
+        "Add Project",
+        reverse("project_create"),
+        icon="diagram-project",
+        perm="jobtracker.add_project",
+        weight=2,
+    ),
+)
+
+Menu.add_item(
+    "add",
+    PermMenuItem(
+        "Add Client",
+        reverse("client_create"),
+        icon="handshake",
+        perm="jobtracker.add_client",
+        weight=3,
     ),
 )
 
@@ -21,7 +43,7 @@ Menu.add_item(
         reverse("request_own_leave"),
         icon="person-walking-arrow-right",
         requiredRole="*",  # Any role will do!
-        weight=2,
+        weight=5,
     ),
 )
 

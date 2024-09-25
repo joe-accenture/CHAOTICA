@@ -112,6 +112,8 @@ CONSTANCE_CONFIG = {
     # Support
     "SUPPORT_DOC_URL": ("https://docs.chaotica.app/en/latest/", "URL to Documentation"),
     "SUPPORT_MAILBOX": ("https://github.com/brainthee/CHAOTICA/issues", "URL to request support"),
+    "SUPPORT_ISSUES_URL": ("https://github.com/brainthee/CHAOTICA/issues", "URL to view current issues"),
+
     # Invite
     "INVITE_ENABLED": (True, "Should we allow inviting users?"),
     "USER_INVITE_EXPIRY": (7, "How long until invites expire"),

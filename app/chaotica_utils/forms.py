@@ -91,6 +91,10 @@ class CustomConfigForm(ConstanceForm):
                         Field("SUPPORT_MAILBOX"),
                         css_class="input-group input-group-dynamic",
                     ),
+                    Div(
+                        Field("SUPPORT_ISSUES_URL"),
+                        css_class="input-group input-group-dynamic",
+                    ),
                 ),
                 Column(
                     HTML('<h4 class="mb-4">Theme Settings</h4>'),

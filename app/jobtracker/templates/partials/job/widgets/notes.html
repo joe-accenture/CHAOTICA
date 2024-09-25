@@ -22,6 +22,9 @@
                     <div class="flex-1 pt-3">
                         {{ note_form.content|as_crispy_field }}
                     </div>
+                    <div class="btn-group ms-2">
+                        <input class="btn btn-outline-info" type="submit" value="Submit" />
+                    </div>
                 </div>
             </form>
             {% include 'partials/notes.html' with notes=job.get_user_notes %}

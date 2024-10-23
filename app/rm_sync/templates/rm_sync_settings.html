@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load menu %}{% load static %}
+
+{% block pageTitle %}Resource Manager Settings{% endblock pageTitle %}
+{% block head_title %}Resource Manager Settings{% endblock head_title %}
+
+{% block headerBlock_css %}mb-6{% endblock headerBlock_css %}
+
+{% block breadcrumbItem %}
+<li class="breadcrumb-item active" aria-current="page">Resource Manager Settings</li>
+{% endblock breadcrumbItem %}
+
+{% block content %}
+<div class="row my-3 justify-content-between">
+  <div class="col-md-9 col-auto">
+    <h2 class="text-bold text-body-emphasis">User Configuration</h2>
+    <h5 class="text-body-tertiary fw-semibold">Control which users are synchronized</h5>
+  </div>
+  <div class="col-12 col-md-auto">
+    <a class="btn btn-phoenix-secondary" href="{% url 'rm_run_sync' %}">
+      <span class="fa-solid fa-rotate me-sm-2"></span>
+      <span class="d-none d-sm-inline">Manual Sync</span>
+    </a>
+    {% comment %} <a class="btn btn-phoenix-danger" href="{% url 'rm_clear_projects' %}">
+      <span class="fa-solid fa-rotate me-sm-2"></span>
+      <span class="d-none d-sm-inline">Clear Data</span>
+    </a> {% endcomment %}
+  </div>
+</div>
+
+      <div class="mx-n4 mx-lg-n6 px-4 px-lg-6 mb-9 bg-body-emphasis border-y mt-2 position-relative top-1">
+        <div class="table-responsive scrollbar ms-n1 ps-1">
+          <table class="table table-sm fs-9 mb-0">
+            <thead>
+              <tr>
+                <th class="sort align-middle" scope="col" data-sort="customer">User</th>
+                <th class="sort align-middle pe-3" scope="col">RM ID</th>
+                <th class="sort" scope="col">Sync Authoritive</th>
+                <th class="sort" scope="col">Sync Active</th>
+                <th class="sort align-middle text-end pe-0" scope="col" ></th>
+              </tr>
+            </thead>
+            <tbody id="rm_records">
+              {% for rm_user in all_users %}
+                <tr class="hover-actions-trigger btn-reveal-trigger position-static">
+                  <td class="align-middle ">
+                    <input type="hidden" name="user" value="{{ rm_user.pk }}">
+                    {% if rm_user.rm_sync_record %}
+                    <input type="hidden" name="pk" value="{{ rm_user.rm_sync_record.pk }}">
+                    {% endif%}
+                    {% csrf_token %}
+                    {% include 'partials/users/user_table_display.html' with u=rm_user %}
+                  </td>
+                  <td class="align-middle ">
+                    <div class="input-group">
+                      <input class="form-control" type="text" name="rm_id" 
+                      id="id_rm_id" placeholder="ID" aria-label="ID" 
+                      aria-describedby="basic-addon1" value="{% if rm_user.rm_sync_record %}{{ rm_user.rm_sync_record.rm_id }}{% endif%}"/>
+                    </div>
+                  </td>
+                  <td class="align-middle">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input text-success" 
+                      id="id_sync_authoritative"
+                      name="sync_authoritative" type="checkbox" {% if rm_user.rm_sync_record and rm_user.rm_sync_record.sync_authoritative %}checked=""{% endif%} />
+                    </div>                    
+                  </td>
+                  <td class="align-middle">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input text-success" 
+                      id="id_sync_enabled"
+                      name="sync_enabled" type="checkbox" {% if rm_user.rm_sync_record and rm_user.rm_sync_record.sync_enabled %}checked=""{% endif%} />
+                    </div>      
+                  </td>
+                  <td class="align-middle text-body-tertiary text-end"></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+      </div>
+{% endblock content %}  
+
+{% block footer_javascript_page %}
+<script>
+  $(document).on("change", "#id_rm_id, .form-check-input", function() {   
+    var url = '{% url 'rm_update_record' %}';
+    var row = $(this).parents("tr").first();
+    var data = row.find("input").serialize();
+    $.post(url, data, function(result){ 
+      if(result.form_is_valid) {
+        // validate any changed fields for 2 seconds
+        for (let fieldKey = 0; fieldKey < result.changed_data.length; fieldKey++) {
+           let fieldName = result.changed_data[fieldKey]
+           var changed_field = row.find('#id_'+fieldName);
+           changed_field.addClass('is-valid');
+           setTimeout(function() {
+              changed_field.removeClass('is-valid');
+           }, 4000);
+        };
+     }
+    });
+  });
+</script>
+{% endblock footer_javascript_page %}

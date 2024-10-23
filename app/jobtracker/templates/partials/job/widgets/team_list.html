@@ -15,7 +15,7 @@
                {% include 'partials/users/user_profile_card.html' with userProfile=job.account_manager %}
             {% else %}
                <div class="avatar avatar-xl">
-                  <span class="rounded-circle fs-4 fas fa-user-slash text-400"></span>
+                  <span class="rounded-circle fs-4 fas fa-user-slash text-secondary-light"></span>
                </div>
             {% endif %}
          
@@ -26,7 +26,7 @@
             <a class="text-800 dropdown-toggle js-load-modal-form text-decoration-none dropdown-caret-none" 
                data-url="{% url 'assign_job_field' job.slug 'account_manager' %}" href="#!">
                Manager
-               <span class="fa-solid fa-caret-down text-800 fs--1 ms-2"></span>
+               <span class="fa-solid fa-caret-down text-800 fs-9 ms-2"></span>
             </a>
          </div>
       </div>
@@ -44,7 +44,7 @@
                {% include 'partials/users/user_profile_card.html' with userProfile=job.dep_account_manager %}
             {% else %}
                <div class="avatar avatar-xl">
-                  <span class="rounded-circle fs-4 fas fa-user-slash text-400"></span>
+                  <span class="rounded-circle fs-4 fas fa-user-slash text-secondary-light"></span>
                </div>
             {% endif %}
 
@@ -54,7 +54,7 @@
             <a class="text-800 dropdown-toggle js-load-modal-form text-decoration-none dropdown-caret-none" 
                data-url="{% url 'assign_job_field' job.slug 'dep_account_manager' %}" href="#!">
                Deputy Manager
-               <span class="fa-solid fa-caret-down text-800 fs--1 ms-2"></span>
+               <span class="fa-solid fa-caret-down text-800 fs-9 ms-2"></span>
             </a>
          </div>
       </div>
@@ -90,7 +90,7 @@
             {% else %}
                <!-- None set -->
                <div class="avatar avatar-xl">
-                  <span class="rounded-circle fs-4 fas fa-user-slash text-400"></span>
+                  <span class="rounded-circle fs-4 fas fa-user-slash text-secondary-light"></span>
                </div>
                
                <h5>
@@ -100,7 +100,7 @@
             <a class="text-800 dropdown-toggle js-load-modal-form text-decoration-none dropdown-caret-none" 
                data-url="{% url 'assign_job_field' job.slug 'scoped_by' %}" href="#!">
                Scoped By
-               <span class="fa-solid fa-caret-down text-800 fs--1 ms-2"></span>
+               <span class="fa-solid fa-caret-down text-800 fs-9 ms-2"></span>
             </a>
          </div>
       </div>
@@ -118,7 +118,7 @@
                {% include 'partials/users/user_profile_card.html' with userProfile=job.scoped_signed_off_by %}
             {% else %}
                <div class="avatar avatar-xl">
-                  <span class="rounded-circle fs-4 fas fa-user-slash text-400"></span>
+                  <span class="rounded-circle fs-4 fas fa-user-slash text-secondary-light"></span>
                </div>
             {% endif %}
          

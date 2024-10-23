@@ -112,6 +112,7 @@ CONSTANCE_CONFIG = {
     # Support
     "SUPPORT_DOC_URL": ("https://docs.chaotica.app/en/latest/", "URL to Documentation"),
     "SUPPORT_MAILBOX": ("https://github.com/brainthee/CHAOTICA/issues", "URL to request support"),
+    "SUPPORT_ISSUES": ("https://github.com/brainthee/CHAOTICA/issues", "URL to issues"),
     # Invite
     "INVITE_ENABLED": (True, "Should we allow inviting users?"),
     "USER_INVITE_EXPIRY": (7, "How long until invites expire"),
@@ -201,6 +202,31 @@ CONSTANCE_CONFIG = {
         "Colour to show comments",
         "colour_picker",
     ),
+    # Notification boxes
+    "NOTIFICATION_POOL_SCOPING_EMAIL_RCPTS": (
+        "",
+        "Additional email recipients for Scoping Pool",
+    ),
+    "NOTIFICATION_POOL_SCHEDULING_EMAIL_RCPTS": (
+        "",
+        "Additional email recipients for Scheduling Pool",
+    ),
+    "NOTIFICATION_POOL_TQA_EMAIL_RCPTS": (
+        "",
+        "Additional email recipients for TQA Pool",
+    ),
+    "NOTIFICATION_POOL_PQA_EMAIL_RCPTS": (
+        "",
+        "Additional email recipients for PQA Pool",
+    ),
+
+    
+    # ResourceManager Integration
+    "RM_SYNC_ENABLED": (False, "Should RM Synchronisation be enabled"),
+    "RM_SYNC_API_TOKEN": ("", "Developer API Token"),
+    "RM_SYNC_API_SITE": ("https://api.rm.smartsheet.com", "Domain of RM API"),
+    "RM_WARNING_MSG": ("This project is managed via CHAOTICA.", "Warning message to display in project descriptions."),
+    "RM_SYNC_STALE_TIMEOUT": (60, "Amount of minutes before a sync task is stale"),
     
 }
 
@@ -268,6 +294,7 @@ DEFAULT_APPS = [
     "django.contrib.humanize",
 ]
 THIRD_PARTY_APPS = [
+    "debug_toolbar",
     "colorfield",
     "constance",
     "django_auth_adfs",
@@ -298,6 +325,7 @@ LOCAL_APPS = [
     "chaotica_utils",
     "jobtracker",
     "dashboard",
+    "rm_sync",
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -316,9 +344,15 @@ BLEACH_ALLOWED_TAGS = [
     "ul",
     "li",
     "ol",
+    "br",
+    "img",
+    "div",
+    "table",
+    "tr",
+    "td",
 ]
 # Which HTML attributes are allowed
-BLEACH_ALLOWED_ATTRIBUTES = ["href", "title", "style"]
+BLEACH_ALLOWED_ATTRIBUTES = ["href", "title", "style", "src"]
 # Which CSS properties are allowed in 'style' attributes (assuming style is
 # an allowed attribute)
 BLEACH_ALLOWED_STYLES = [
@@ -327,23 +361,27 @@ BLEACH_ALLOWED_STYLES = [
     "font-weight",
     "text-decoration",
     "font-variant",
+    "width",
+    "height",
 ]
 # Which protocols (and pseudo-protocols) are allowed in 'src' attributes
 # (assuming src is an allowed attribute)
 BLEACH_ALLOWED_PROTOCOLS = ["http", "https", "data"]
 
 DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 14
+DJANGO_CRON_LOCK_BACKEND="django_cron.backends.lock.file.FileLock"
 CRON_CLASSES = [
     "chaotica_utils.tasks.task_update_holidays",
     "chaotica_utils.tasks.task_send_email_notifications",
     "chaotica_utils.tasks.task_sync_global_permissions",
     "chaotica_utils.tasks.task_sync_role_permissions_to_default",
     "chaotica_utils.tasks.task_sync_role_permissions",
-
     "chaotica_utils.tasks.task_backup_site",
 
     "jobtracker.tasks.task_progress_workflows",
     "jobtracker.tasks.task_fire_job_notifications",
+
+    "rm_sync.tasks.task_sync_rm_schedule",
 ]
 
 REST_FRAMEWORK = {
@@ -366,6 +404,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     "chaotica_utils.middleware.HealthCheckMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -381,6 +420,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "chaotica.urls"
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 
 TEMPLATES = [
     {

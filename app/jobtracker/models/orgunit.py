@@ -90,6 +90,11 @@ class OrganisationalUnit(models.Model):
             ("can_signoff_own_scopes", "Can signoff own scopes"),
             ("can_tqa_jobs", "Can TQA jobs"),
             ("can_pqa_jobs", "Can PQA jobs"),
+            # Notification pools
+            ("notification_pool_scoping", "Scoping Pool"),
+            ("notification_pool_scheduling", "Scheduling Pool"),
+            ("notification_pool_tqa", "TQA Pool"),
+            ("notification_pool_pqa", "PQA Pool"),
             # Leave
             (
                 "can_view_all_leave_requests",
@@ -177,13 +182,15 @@ class OrganisationalUnit(models.Model):
 
     def get_allMembers(self):
         ids = []
-        for mgr in OrganisationalUnitMember.objects.filter(unit=self):
-            if mgr.member.pk not in ids:
-                ids.append(mgr.member.pk)
-        if ids:
-            return User.objects.filter(pk__in=ids)
-        else:
-            return User.objects.none()
+        return User.objects.filter(pk__in=
+                                   self.members.all().values_list("member__pk", flat=True))
+        # for mgr in OrganisationalUnitMember.objects.filter(unit=self):
+        #     if mgr.member.pk not in ids:
+        #         ids.append(mgr.member.pk)
+        # if ids:
+        #     return User.objects.filter(pk__in=ids)
+        # else:
+        #     return User.objects.none()
 
     def get_absolute_url(self):
         if not self.slug:

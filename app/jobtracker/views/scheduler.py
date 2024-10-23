@@ -38,6 +38,7 @@ from chaotica_utils.utils import (
     datetime_startofday,
     datetime_endofday,
 )
+from django.contrib import messages
 
 
 logger = logging.getLogger(__name__)
@@ -59,7 +60,7 @@ def _filter_users_on_query(request):
         show_inactive_users = filter_form.cleaned_data.get("show_inactive_users")
     else:
         show_inactive_users = False
-        print("NOTVALID")
+        
     cleaned_data = filter_form.clean()
 
     # Starting users filter
@@ -76,16 +77,17 @@ def _filter_users_on_query(request):
 
     if filter_form.is_valid():
         # If we're passed a job/phase ID - filter on that.
-        job = cleaned_data.get("job")
-        phase_id = clean_int(request.GET.get("phase", None))
-        if job:
-            if phase_id:
-                phase = get_object_or_404(Phase, job=job, pk=phase_id)
-                query.add(Q(pk__in=phase.team()), Q.AND)
-            else:
-                # get the team for the whole job...
+        jobs = cleaned_data.get("jobs")
+        if jobs:
+            for job in jobs:
                 query.add(Q(pk__in=job.team()), Q.AND)
-        else:
+
+        phases = cleaned_data.get("phases")
+        if phases:
+            for phase in phases:
+                query.add(Q(pk__in=phase.team()), Q.AND)
+        
+        if not jobs and not phases:
             query.add(Q(pk__in=users_pk), Q.AND)
 
         # Now lets apply the filters from the query...
@@ -169,19 +171,16 @@ def _filter_users_on_query(request):
         for service in services:
             query.add(Q(pk__in=service.users_can_conduct()), Q.AND)
 
-    extra_user = clean_int(request.GET.get("include_user", None))
-    if extra_user:
-        if extra_user:
-            query.add(
-                Q(
-                    pk__in=[
-                        extra_user,
-                    ]
-                ),
-                Q.OR,
-            )
+    extra_users = cleaned_data.get("include_user")
+    if extra_users:
+        query.add(
+            Q(
+                pk__in=extra_users
+            ),
+            Q.OR,
+        )
 
-    return User.objects.filter(query).distinct().order_by("last_name", "first_name")
+    return User.objects.filter(query).distinct().order_by("last_name", "first_name").prefetch_related("timeslots")
 
 
 @login_required
@@ -196,12 +195,29 @@ def view_scheduler_slots(request):
     job_id = clean_int(request.GET.get("job", None))
     phase_id = clean_int(request.GET.get("phase", None))
 
-    if job_id:
+    if phase_id:
+        phase_focus = get_object_or_404(Phase, pk=phase_id)
+    elif job_id:
         job = get_object_or_404(Job, pk=job_id)
-        if phase_id:
-            phase_focus = get_object_or_404(Phase, job=job, pk=phase_id)
-        else:
-            phase_focus = job
+        phase_focus = job
+    
+    # # Lets get slots!
+    # slots = TimeSlot.objects.filter(user__in=filtered_users, end__gte=start, start__lte=end)
+    # print("got slots")
+    # for slot in slots:
+    #     print("processing "+str(slot))
+    #     slot_json = slot.get_schedule_json()
+    #     is_focused = False
+    #     if phase_focus:
+    #         if slot.phase:
+    #             if slot.phase == phase_focus:
+    #                 is_focused = True
+    #             if not is_focused and slot.phase.job == phase_focus:
+    #                 is_focused = True
+    #     if phase_focus and not is_focused:
+    #         slot_json["display"] = "background"
+    #     data.append(slot_json)
+    #     print("done processing "+str(slot))
 
     for user in filtered_users:
         data = data + user.get_timeslots(start=start, end=end, phase_focus=phase_focus)

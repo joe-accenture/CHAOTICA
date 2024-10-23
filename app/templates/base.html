@@ -4,20 +4,13 @@
 {% load menu %}{% generate_menu %}
 
 <!DOCTYPE html>
-<html lang="en-US" dir="ltr">
+<html lang="en-US" dir="ltr" data-navigation-type="dual" data-navbar-horizontal-shape="default">
 
   <head>
     {% block head_meta %}
-      {% block head_meta_charset %}
       <meta charset="utf-8">
-      {% endblock head_meta_charset %}
-      {% block head_meta_contentlanguage %}
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      {% endblock head_meta_contentlanguage %}
-      {% block head_meta_viewport %}
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      {% endblock head_meta_viewport %}
-
     {% endblock head_meta %}
 
 
@@ -38,9 +31,6 @@
     <link rel="manifest" href="{% static "assets/img/favicons/manifest.json" %}">
     <meta name="msapplication-TileImage" content="{% static "assets/img/favicons/mstile-150x150.png" %}">
     <meta name="theme-color" content="#ffffff">
-    <script>
-      document.documentElement.classList.add('dual-nav');
-    </script>
 
     <!-- Font Awesome Icons -->
     <script src="https://kit.fontawesome.com/795119481a.js" crossorigin="anonymous"></script>
@@ -62,35 +52,20 @@
     <!-- ===============================================-->
     <!--    Stylesheets-->
     <!-- ===============================================-->
+    
+    <link href="{% static "assets/css/theme.css" %}" type="text/css" rel="stylesheet" id="style-default">
+    <link href="{% static "assets/css/user.css" %}" type="text/css" rel="stylesheet" id="user-style-default">
+    <link href="{% static "assets/css/chaotica.css" %}" rel="stylesheet">
+
     <link href="{% static "vendors/choices/choices.min.css" %}" rel="stylesheet">
-    <link href="{% static "vendors/dropzone/dropzone.min.css" %}" rel="stylesheet">
+    <link href="{% static "vendors/dropzone/dropzone.css" %}" rel="stylesheet">
     <link href="{% static "vendors/dhtmlx-gantt/dhtmlxgantt.css" %}" rel="stylesheet">
     <link href="{% static "vendors/simplebar/simplebar.min.css" %}" rel="stylesheet">
     <link href="{% static "vendors/flatpickr/flatpickr.min.css" %}" rel="stylesheet">
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
-    <link href="{% static "assets/css/theme-rtl.min.css" %}" type="text/css" rel="stylesheet" id="style-rtl">
-    <link href="{% static "assets/css/theme.min.css" %}" type="text/css" rel="stylesheet" id="style-default">
-    <link href="{% static "assets/css/user-rtl.min.css" %}" type="text/css" rel="stylesheet" id="user-style-rtl">
-    <link href="{% static "assets/css/user.min.css" %}" type="text/css" rel="stylesheet" id="user-style-default">
-    <script>
-      var phoenixIsRTL = window.config.config.phoenixIsRTL;
-      if (phoenixIsRTL) {
-        var linkDefault = document.getElementById('style-default');
-        var userLinkDefault = document.getElementById('user-style-default');
-        linkDefault.setAttribute('disabled', true);
-        userLinkDefault.setAttribute('disabled', true);
-        document.querySelector('html').setAttribute('dir', 'rtl');
-      } else {
-        var linkRTL = document.getElementById('style-rtl');
-        var userLinkRTL = document.getElementById('user-style-rtl');
-        linkRTL.setAttribute('disabled', true);
-        userLinkRTL.setAttribute('disabled', true);
-      }
-    </script>
     <link href="{% static "vendors/leaflet/leaflet.css" %}" rel="stylesheet">
     <link href="{% static "vendors/leaflet.markercluster/MarkerCluster.css" %}" rel="stylesheet">
     <link href="{% static "vendors/leaflet.markercluster/MarkerCluster.Default.css" %}" rel="stylesheet">
-    <link href="{% static "assets/css/chaotica.css" %}" rel="stylesheet">
 
 
     <!-- Select2 -->
@@ -118,7 +93,8 @@
     {% block head_css_section %}{% endblock head_css_section %}
     {% block head_css_page %}{% endblock head_css_page %}
 
-          <!--   Core JS Files   -->
+
+    <!--   Core JS Files   -->
     <script src="{% static "vendors/popper/popper.min.js" %}"></script>
     <script src="{% static "vendors/bootstrap/bootstrap.min.js" %}"></script>
     <script src="{% static "vendors/anchorjs/anchor.min.js" %}"></script>
@@ -129,7 +105,7 @@
     <script src="{% static "vendors/feather-icons/feather.min.js" %}"></script>
     <script src="{% static "vendors/dayjs/dayjs.min.js" %}"></script>
     <script src="{% static "vendors/echarts/echarts.min.js" %}"></script>
-    <script src="{% static "vendors/dropzone/dropzone.min.js" %}"></script>
+    <script src="{% static "vendors/dropzone/dropzone-min.js" %}"></script>
     <script src="{% static "vendors/choices/choices.min.js" %}"></script>
     <script src="{% static "vendors/leaflet/leaflet.js" %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -145,19 +121,19 @@
     <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
 
-
-
-    <script src="{% static "assets/js/phoenix.js" %}"></script>
-    <script src="{% static "assets/js/ecommerce-dashboard.js" %}"></script>
-
     <!-- Calendar -->
-    {% comment %} <script src="{% static "assets/js/fullcalendar-scheduler.js" %}"></script> {% endcomment %}
     <script src="{% static "vendors/fullcalendar/index.global.js" %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/superagent"></script>
 
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script>
+    <script src="{% static "assets/js/snow.js" %}"></script> 
+
+    <script src="{% static "assets/js/phoenix.js" %}"></script>
+    <script>
+      {% include 'js/core.js' %}
+    </script>
 
   </head>
 
@@ -198,7 +174,7 @@
         {% block breadcrumbs %}
           <nav class="pt-1 text-600 {% block breadcrumb_classes %}{% endblock breadcrumb_classes %}" style="--phoenix-breadcrumb-divider: '&gt;&gt;';" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-              <li class="breadcrumb-item text-sm"><a class="opacity-50 text-dark" href="{% url 'home' %}">Home</a></li>
+              <li class="breadcrumb-item text-sm"><a class="opacity-50 text-body-emphasis" href="{% url 'home' %}">Home</a></li>
               {% block breadcrumbItem %}
               {% endblock breadcrumbItem %}
             </ol>
@@ -208,28 +184,14 @@
         {% block content %}
             if you see this, something is wrong!
         {% endblock content %}
+
+        {% block footer %}
+        <footer class="footer {% block footer_css %}position-absolute{% endblock footer_css %}">
+          {% include 'partials/footer.html' %}
+        </footer>
+        {% endblock footer %}
       </div>
-
-      {% block footer %}
-      <footer class="footer {% block footer_css %}position-absolute{% endblock footer_css %}">
-        {% include 'partials/footer.html' %}
-      </footer>
-      {% endblock footer %}
     {% endblock page_content %}
-
-    <script>
-      var navbarTopStyle = window.config.config.phoenixNavbarTopStyle;
-      var navbarTop = document.querySelector('.navbar-top');
-      if (navbarTopStyle === 'darker') {
-        navbarTop.classList.add('navbar-darker');
-      }
-
-      var navbarVerticalStyle = window.config.config.phoenixNavbarVerticalStyle;
-      var navbarVertical = document.querySelector('.navbar-vertical');
-      if (navbarVertical && navbarVerticalStyle === 'darker') {
-        navbarVertical.classList.add('navbar-darker');
-      }
-    </script>
 
   </main>
   {% endblock main_content %}    
@@ -246,13 +208,9 @@
   <!-- ===============================================-->
   {% block footer_javascript %}
     {% block footer_javascript_site %}
-    <script>
-      {% include 'js/core.js' %}
-    </script>
     
     {% if config.SNOW_ENABLED %}  
     <!-- SNNOOOWWWW!! -->
-    <script src="{% static "assets/js/snow.js" %}"></script> 
     <script>
       jQuery(document).ready(function($){
         $('#snowControl').change(function() {
@@ -283,7 +241,6 @@
 
     {% if IS_APP_BIRTHDAY %}
     <!-- It's the app's birthday today! Woo! -->
-    <script src="{% static "assets/js/snow.js" %}"></script> 
     <script>
       jQuery(document).ready(function($){            
         var showBirthday = localStorage.showBirthday;
@@ -309,7 +266,7 @@
             title: "Happy Birthday CHAOTICA!",
             html: `
               CHAOTICA turns {{ CHAOTICA_BIRTHDAY_YEARS_OLD }} today!. 
-              <p class="text-secondary fst-italic fs-6">Don't worry though... I'll only show this once <br />🥳🥳🥳</p>
+              <p class="text-secondary fst-italic fs-2">Don't worry though... I'll only show this once <br />🥳🥳🥳</p>
             `,
             showClass: {
               popup: `

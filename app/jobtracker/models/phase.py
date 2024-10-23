@@ -149,26 +149,26 @@ class Phase(models.Model):
     report_to_be_left_on_client_site = models.BooleanField(default=False)
 
     # links
-    linkDeliverable = models.URLField(
-        max_length=2000,
+    linkDeliverable = models.TextField(
         default="",
         null=True,
         blank=True,
         verbose_name="Link to Deliverable",
+        help_text="Typically this is the content delivered to the client."
     )
-    linkTechData = models.URLField(
-        max_length=2000,
+    linkTechData = models.TextField(
         default="",
         null=True,
         blank=True,
         verbose_name="Link to Technical Data",
+        help_text="All data generated during the job."
     )
-    linkReportData = models.URLField(
-        max_length=2000,
+    linkReportData = models.TextField(
         default="",
         null=True,
         blank=True,
         verbose_name="Link to Report Data",
+        help_text="Data used to generate the report such as checklists or evidence."
     )
 
     # Desirable dates
@@ -263,6 +263,8 @@ class Phase(models.Model):
 
     @property
     def due_to_techqa(self):
+        if self.number_of_reports == 0:
+            return None
         if self.due_to_techqa_set:
             return self.due_to_techqa_set
         else:
@@ -286,6 +288,8 @@ class Phase(models.Model):
 
     @property
     def due_to_presqa(self):
+        if self.number_of_reports == 0:
+            return None
         if self.due_to_presqa_set:
             return self.due_to_presqa_set
         else:
@@ -336,17 +340,19 @@ class Phase(models.Model):
     def is_delivery_late(self):
         # This relies on delivery_date being valid (which needs it manually set or a timeslot...)
         if self.delivery_date:
-            # Two ways to be late - it's not delivered yet and it should have been...
-            if self.status < PhaseStatuses.DELIVERED:
-                if self.delivery_date < timezone.now().today().date():
-                    return True
+            # If no reports - there's nothing to deliver!
+            if self.number_of_reports > 0:
+                # Two ways to be late - it's not delivered yet and it should have been...
+                if self.status < PhaseStatuses.DELIVERED:
+                    if self.delivery_date < timezone.now().today().date():
+                        return True
 
-            # Or it was delivered but beyond the actual time and we still want to mark it as late
-            if (
-                self.actual_delivery_date
-                and self.delivery_date < self.actual_delivery_date.date()
-            ):
-                return True
+                # Or it was delivered but beyond the actual time and we still want to mark it as late
+                if (
+                    self.actual_delivery_date
+                    and self.delivery_date < self.actual_delivery_date.date()
+                ):
+                    return True
         return False
 
     @property
@@ -500,6 +506,10 @@ class Phase(models.Model):
         email_template = "emails/phase_content.html"
         now = timezone.now()
 
+        if self.number_of_reports == 0:
+            # No reports - nothing to fire!
+            return
+
         if self.is_tqa_late and (
             self.status == PhaseStatuses.IN_PROGRESS
             or self.status == PhaseStatuses.PENDING_TQA
@@ -535,6 +545,10 @@ class Phase(models.Model):
     def fire_late_to_pqa_notification(self):
         email_template = "emails/phase_content.html"
         now = timezone.now()
+
+        if self.number_of_reports == 0:
+            # No reports - nothing to fire!
+            return
 
         if self.is_pqa_late and (
             self.status == PhaseStatuses.PENDING_PQA
@@ -574,6 +588,10 @@ class Phase(models.Model):
         email_template = "emails/phase_content.html"
         now = timezone.now()
 
+        if self.number_of_reports == 0:
+            # No reports - nothing to fire!
+            return
+
         if self.is_delivery_late:
             # check if we should or not...
             hours_since = 0
@@ -607,7 +625,36 @@ class Phase(models.Model):
 
     def fire_status_notification(self, target_status):
         email_template = "emails/phase_content.html"
-        if target_status == PhaseStatuses.SCHEDULED_CONFIRMED:
+
+        if target_status == PhaseStatuses.PENDING_SCHED:
+            users_to_notify = self.job.unit.get_active_members_with_perm(
+                "notification_pool_scheduling"
+            )
+            
+            notice = AppNotification(
+                NotificationTypes.PHASE,
+                "Phase Update - {phase} - Ready for scheduling".format(phase=self),
+                "{phase} is ready for Scheduling".format(phase=self),
+                email_template,
+                action_link=self.get_absolute_url(),
+                phase=self,
+            )
+            task_send_notifications(notice, users_to_notify, config.NOTIFICATION_POOL_SCHEDULING_EMAIL_RCPTS)
+            # Lets also update the audit log
+            for user in users_to_notify:
+                log_system_activity(
+                    self,
+                    "Ready for Scheduling notification sent to {target}".format(
+                        target=user.email
+                    ),
+                )
+            if config.NOTIFICATION_POOL_SCHEDULING_EMAIL_RCPTS:
+                log_system_activity(
+                    self,
+                    "Ready for scheduling notification sent to configured scheduling Pool",
+                )
+
+        elif target_status == PhaseStatuses.SCHEDULED_CONFIRMED:
             # Notify project team
             users_to_notify = self.team()
             notice = AppNotification(
@@ -717,8 +764,11 @@ class Phase(models.Model):
         elif target_status == PhaseStatuses.PENDING_TQA:
             # Notify qa team
             if not self.techqa_by:
+                # users_to_notify = self.job.unit.get_active_members_with_perm(
+                #     "can_tqa_jobs"
+                # )
                 users_to_notify = self.job.unit.get_active_members_with_perm(
-                    "can_tqa_jobs"
+                    "notification_pool_tqa"
                 )
             else:
                 users_to_notify = User.objects.filter(pk=self.techqa_by.pk)
@@ -730,7 +780,7 @@ class Phase(models.Model):
                 action_link=self.get_absolute_url(),
                 phase=self,
             )
-            task_send_notifications(notice, users_to_notify)
+            task_send_notifications(notice, users_to_notify, config.NOTIFICATION_POOL_TQA_EMAIL_RCPTS)
             # Lets also update the audit log
             for user in users_to_notify:
                 log_system_activity(
@@ -739,6 +789,12 @@ class Phase(models.Model):
                         target=user.email
                     ),
                 )
+            if config.NOTIFICATION_POOL_TQA_EMAIL_RCPTS:
+                log_system_activity(
+                    self,
+                    "Ready for TQA notification sent to configured TQA Pool",
+                )
+
 
         elif target_status == PhaseStatuses.QA_TECH_AUTHOR_UPDATES:
             users_to_notify = User.objects.filter(pk=self.report_author.pk)
@@ -763,8 +819,11 @@ class Phase(models.Model):
         elif target_status == PhaseStatuses.PENDING_PQA:
             # Notify qa team
             if not self.presqa_by:
+                # users_to_notify = self.job.unit.get_active_members_with_perm(
+                #     "can_pqa_jobs"
+                # )
                 users_to_notify = self.job.unit.get_active_members_with_perm(
-                    "can_pqa_jobs"
+                    "notification_pool_pqa"
                 )
             else:
                 users_to_notify = User.objects.filter(pk=self.presqa_by.pk)
@@ -776,7 +835,7 @@ class Phase(models.Model):
                 action_link=self.get_absolute_url(),
                 phase=self,
             )
-            task_send_notifications(notice, users_to_notify)
+            task_send_notifications(notice, users_to_notify, config.NOTIFICATION_POOL_PQA_EMAIL_RCPTS)
             # Lets also update the audit log
             for user in users_to_notify:
                 log_system_activity(
@@ -784,6 +843,11 @@ class Phase(models.Model):
                     "Ready for PQA notification sent to {target}".format(
                         target=user.email
                     ),
+                )
+            if config.NOTIFICATION_POOL_PQA_EMAIL_RCPTS:
+                log_system_activity(
+                    self,
+                    "Ready for TQA notification sent to configured PQA Pool",
                 )
 
         elif target_status == PhaseStatuses.QA_PRES_AUTHOR_UPDATES:
@@ -828,7 +892,7 @@ class Phase(models.Model):
                 )
 
         elif target_status == PhaseStatuses.POSTPONED:
-            users_to_notify = None
+            users_to_notify = self.team()
             notice = AppNotification(
                 NotificationTypes.PHASE,
                 "Phase Update - {phase} - Postponed".format(phase=self),
@@ -1056,6 +1120,7 @@ class Phase(models.Model):
             self.MOVED_TO + PhaseStatuses.CHOICES[PhaseStatuses.PENDING_SCHED][1],
             author=user,
         )
+        self.fire_status_notification(PhaseStatuses.PENDING_SCHED)
 
     def can_proceed_to_pending_sched(self):
         return can_proceed(self.to_pending_sched)
@@ -1776,6 +1841,9 @@ class Phase(models.Model):
             author=user,
         )
         self.cancellation_date = timezone.now()
+        for slot in self.timeslots.all():
+            slot.delete()
+
         self.fire_status_notification(PhaseStatuses.CANCELLED)
 
     def can_proceed_to_cancelled(self):
@@ -1787,10 +1855,16 @@ class Phase(models.Model):
 
         # Do general check
         can_proceed_result = can_proceed(self.to_cancelled)
+
         if not can_proceed_result:
             if notify_request:
                 messages.add_message(notify_request, messages.ERROR, self.INVALID_STATE)
             _can_proceed = False
+        else:
+            # Show a warning to the user that any timeslots will be erased
+            if notify_request:
+                messages.add_message(notify_request, messages.INFO, 
+                                     "Warning - any scheduled timeslots will be deleted!")
         return _can_proceed
 
     # POSTPONED

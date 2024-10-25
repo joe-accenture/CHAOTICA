@@ -350,9 +350,13 @@ BLEACH_ALLOWED_TAGS = [
     "table",
     "tr",
     "td",
+    "thead",
+    "tbody",
+    "col",
+    "colgroup",
 ]
 # Which HTML attributes are allowed
-BLEACH_ALLOWED_ATTRIBUTES = ["href", "title", "style", "src"]
+BLEACH_ALLOWED_ATTRIBUTES = ["href", "title", "style", "src", "class"]
 # Which CSS properties are allowed in 'style' attributes (assuming style is
 # an allowed attribute)
 BLEACH_ALLOWED_STYLES = [

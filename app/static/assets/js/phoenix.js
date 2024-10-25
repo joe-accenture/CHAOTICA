@@ -4161,8 +4161,18 @@
                 items: ['alignleft', 'aligncenter', 'alignright', 'alignjustify']
               },
               { name: 'list', items: ['numlist', 'bullist'] },
+              { name: 'table', items: ['table'] },
               { name: 'link', items: ['link'] }
             ],
+            table_default_attributes: {
+              'class': 'table'
+            },
+            paste_postprocess: (editor, args) => {
+              const tables = args.node.querySelectorAll('table');
+              tables.forEach(table => {
+                table.classList.add('table');
+              });
+            },
             setup: editor => {
               editor.on('focus', () => {
                 const wraper = document.querySelector('.tox-sidebar-wrap');

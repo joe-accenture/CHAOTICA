@@ -118,6 +118,11 @@ table.dataTable.no-footer {
   display: initial;
 }
 
+@media (max-width: 1199.98px) {
+  .mid--full-width {
+    width: 100%;
+  }
+}
 
 /* 
 Do Force select2 to be phoenix compat
